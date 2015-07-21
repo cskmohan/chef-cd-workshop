@@ -4,33 +4,11 @@
 #
 # Copyright (c) 2015 The Authors, All Rights Reserved.
 
-# add the EPEL repo so we can install Docker (docker-io)
-case node["platform"]
-when "centos"
-  yum_repository 'epel' do
-    description 'Extra Packages for Enterprise Linux'
-    mirrorlist 'http://mirrors.fedoraproject.org/mirrorlist?repo=epel-6&arch=$basearch'
-    gpgkey 'http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-6'
-    action :create
-  end
-when 'ubuntu'
-  packagecloud_repo 'chef/stable'
-
-  package 'delivery-cli'
-  
-  execute "apt_update" do
-    command "apt-get update"
-    action :run
-  end
-end
+chef_ingredient 'delivery-cli'
+chef_ingredient 'chefdk'
 
 # Install Git
 package 'git' do
-  action :install
-end
-
-# Install ChefDK
-chef_dk 'ChefDK' do 
   action :install
 end
 
@@ -42,15 +20,8 @@ gem_package 'kitchen-docker' do
 end
 
 # Install Docker
-case node["platform"]
-when "centos"
-  package 'docker-io' do
-    action :install
-  end
-when 'ubuntu'
-  docker_service 'default' do
-    action [:create, :start]
-  end
+docker_service 'default' do
+  action [:create, :start]
 end
 
 service 'docker' do
